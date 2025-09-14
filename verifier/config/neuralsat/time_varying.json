@@ -1,0 +1,8 @@
+{
+    "use_restart": false,
+    "use_mip_tightening": false,
+    "use_attack": true,
+    "share_alphas": true,
+    "skip_preprocess": true,
+    "backward_batch_size": 32
+}

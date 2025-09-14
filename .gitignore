@@ -1,0 +1,6 @@
+generated_benchmark*
+data/
+*.tar
+*.tar.xz
+log/
+misc/

@@ -1,0 +1,25 @@
+torch
+torchaudio
+torchvision
+numpy
+matplotlib
+seaborn
+onnx
+onnxruntime
+tqdm
+joblib
+scipy
+soundfile
+# neuralsat
+beartype
+gurobipy
+onnxsim
+packaging
+sortedcontainers
+# abcrown
+pyyaml
+appdirs
+graphviz
+onnxoptimizer
+skl2onnx
+psutil
