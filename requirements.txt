@@ -10,6 +10,7 @@ tqdm
 joblib
 scipy
 soundfile
+torchcodec
 # neuralsat
 beartype
 gurobipy

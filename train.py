@@ -16,10 +16,10 @@ def parse_args():
     p.add_argument("--model", type=str, default="m5", choices=["m5", "m3"])
     p.add_argument("--n_channel", type=int, default=32)
     p.add_argument("--data_dir", type=str, default="./data", help="Root directory for data")
-    p.add_argument("--batch_size", type=int, default=128)
+    p.add_argument("--batch_size", type=int, default=32)
     p.add_argument("--epochs", type=int, default=50)
-    p.add_argument("--lr", type=float, default=1e-3)
-    p.add_argument("--weight_decay", type=float, default=1e-4)
+    p.add_argument("--lr", type=float, default=1e-4)
+    p.add_argument("--weight_decay", type=float, default=1e-5)
     p.add_argument("--num_workers", type=int, default=os.cpu_count())
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--checkpoint_dir", type=str, default="./checkpoints/")
@@ -87,7 +87,7 @@ def main():
         device=device, 
         scheduler=None, 
         use_amp=True,
-        max_grad_norm=None
+        max_grad_norm=5
     )
 
     print(f"Starting {args.task} training...")
