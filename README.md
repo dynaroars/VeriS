@@ -72,3 +72,23 @@ pip install -r requirements.txt
     ```bash
     make verify
     ```
+
+- The experiments might take up to `3 * 5000 * 30 / 3600 = 125` hours (1 variant of `NeuralSAT` and 2 variants of `alpha-beta-CROWN`, 5000+ problems, 30 seconds timeout per problem).
+
+### 6. Reproduce figures and tables
+
+
+- Extract all results and save to CSV files:
+    ```bash
+    make create_csv
+    ```
+
+- Create figures:
+    ```bash
+    make create_plot
+    ```
+
+- Create tables:
+    ```bash
+    make create_table
+    ```

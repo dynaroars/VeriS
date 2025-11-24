@@ -93,8 +93,8 @@ verify_abcrown_A_varying:
 
 create_csv:
 	python plot/export_results.py --output_dir ${RESULTS_DIR} --benchmark_dir ${GEN_SPEC_DIR}
-	python plot/export_results.py --output_dir ${RESULTS_DIR_BASELINE} --benchmark_dir ${GEN_SPEC_BASELINE_DIR} --postfix baseline
-	python plot/export_results.py --output_dir ${RESULTS_DIR_UNOPTIMIZED} --benchmark_dir ${GEN_SPEC_UNOPTIMIZED_DIR} --postfix unoptimized
+	# python plot/export_results.py --output_dir ${RESULTS_DIR_BASELINE} --benchmark_dir ${GEN_SPEC_BASELINE_DIR} --postfix baseline
+	# python plot/export_results.py --output_dir ${RESULTS_DIR_UNOPTIMIZED} --benchmark_dir ${GEN_SPEC_UNOPTIMIZED_DIR} --postfix unoptimized
 
 export_csv_baseline:
 	python plot/export_results.py --output_dir ${RESULTS_DIR_BASELINE} --benchmark_dir ${GEN_SPEC_BASELINE_DIR} --postfix baseline
@@ -102,7 +102,7 @@ export_csv_baseline:
 
 create_table:
 	python plot/create_tables.py --csv plot/neuralsat_results.csv
-	python plot/create_tables.py --csv plot/neuralsat_results_baseline.csv
+	# python plot/create_tables.py --csv plot/neuralsat_results_baseline.csv
 
 create_plot:
 	python3 -m plot.time_varying_example
