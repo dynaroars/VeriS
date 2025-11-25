@@ -41,7 +41,7 @@ pip install -r requirements.txt
     make spec
     ```
 
-- Generated specficiations are stored at `GEN_SPEC_DIR` speficied in [Makefile](Makefile). Networks are stored at `onnx`, specifications are stored at `vnnlib`, and `instances.csv` defines verification problems, where each problem is a tuple of (network, specficiation).
+- Generated specifications are stored at `GEN_SPEC_DIR` speficied in [Makefile](Makefile). Networks are stored at `onnx`, specifications are stored at `vnnlib`, and `instances.csv` defines verification problems, where each problem is a tuple of (network, specification).
     ```
     generated_benchmark_new/
     ├── time_invariant
