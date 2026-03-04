@@ -137,12 +137,15 @@ if __name__ == "__main__":
     deformed = layer(w_values)
     print("Output Shape:", deformed.shape)
     
-    images = [('w = 0.0 (Original)', deformed[0]), 
-              ('w = 0.2', deformed[1]), 
-              ('w = 0.4', deformed[2]), 
-              ('w = 0.6', deformed[3]), 
-              ('w = 0.8', deformed[4]), 
-              ('w = 1.0', deformed[5])]
+    images = [
+        ('Original', img_tensor),
+        ('w = 0.0', deformed[0]), 
+        ('w = 0.2', deformed[1]), 
+        ('w = 0.4', deformed[2]), 
+        ('w = 0.6', deformed[3]), 
+        ('w = 0.8', deformed[4]), 
+        ('w = 1.0', deformed[5]),
+    ]
 
     fig, axes = plt.subplots(1, len(images), figsize=(12, 3))
     for i, (title, img) in enumerate(images):
