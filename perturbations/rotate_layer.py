@@ -1,20 +1,13 @@
-import torch
+import torchvision.transforms as transforms
+from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
 import torch.nn as nn
-from PIL import Image
-import numpy as np
+import torchvision
+import torch
 
 
-def load_image(path: str) -> torch.Tensor:
-    img = Image.open(path).convert("RGB")
-    tensor = torch.tensor(np.array(img), dtype=torch.float32) / 255.0
-    return tensor.permute(2, 0, 1)
-
-
-def to_pil(tensor: torch.Tensor) -> Image.Image:
-    tensor = tensor.clamp(0.0, 1.0)
-    array = (tensor.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
-    return Image.fromarray(array)
-
+def abs2relu(x: torch.Tensor) -> torch.Tensor:
+    return 2 * torch.relu(x) - x
 
 class RotationPerturbationLayer(nn.Module):
 
@@ -43,19 +36,10 @@ class RotationPerturbationLayer(nn.Module):
         self.register_buffer("x_coords", xs)
         self.register_buffer("y_coords", ys)
 
-    def _prepare_angles(self, theta, degrees: bool) -> torch.Tensor:
-        theta = torch.as_tensor(theta, dtype=torch.float32, device=self.image.device)
-        if theta.ndim == 0:
-            theta = theta.unsqueeze(0)
-        theta = theta.view(-1)
-        if degrees:
-            theta = torch.deg2rad(theta)
-        return theta
-
     @staticmethod
     def _tent_weights(offset: torch.Tensor) -> torch.Tensor:
-        z = 1.0 - offset.abs()
-        return 0.5 * (z + z.abs())
+        z = 1.0 - abs2relu(offset)
+        return 0.5 * (z + abs2relu(z))
 
     def _bilinear_sample(self, src_x: torch.Tensor, src_y: torch.Tensor) -> torch.Tensor:
         batch_size = src_x.shape[0]
@@ -78,8 +62,7 @@ class RotationPerturbationLayer(nn.Module):
         sampled = sampled.permute(0, 2, 1)  # [B, C, N]
         return sampled
 
-    def rotate(self, theta, degrees: bool = True) -> torch.Tensor:
-        theta = self._prepare_angles(theta, degrees)
+    def forward(self, theta) -> torch.Tensor:
         batch_size = theta.shape[0]
 
         cos_theta = torch.cos(theta).view(batch_size, 1, 1)
@@ -102,15 +85,48 @@ class RotationPerturbationLayer(nn.Module):
         samples = self._bilinear_sample(src_x, src_y)
         return samples.view(batch_size, self.C, self.H, self.W)
 
-    def forward(self, theta, degrees: bool = True) -> torch.Tensor:
-        return self.rotate(theta, degrees=degrees)
-
 if __name__ == "__main__":
-    theta_degrees = torch.tensor([0.0, 45])
-
-    img_tensor = torch.randn(3, 32, 32)
+    torch.manual_seed(37)
+    theta_degrees = torch.tensor([0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0])
+    
+    # dataset
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
+    dataset = torchvision.datasets.MNIST(root='data', download=True, transform=transform, train=False)
+    dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
+    
+    for img, _ in dataloader:
+        img_tensor = img.squeeze(0)
+        break
+    
     layer = RotationPerturbationLayer(img_tensor)
-    rotated = layer(theta_degrees, degrees=True)
+    theta_radians = torch.deg2rad(theta_degrees)
+    rotated = layer(theta_radians)
     print(rotated.shape)
+    print(rotated.sum().item())
+    
+    
+    images = [('Original', img_tensor)]
+    for i in range(len(theta_degrees)):
+        images.append((f"Theta: {theta_degrees[i]}", rotated[i]))
+
+    n_rows = 2
+    n_cols = len(images) // 2
+    
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(10, 5 * n_rows / 2))
+    # Flatten axes if it's a 2D array to make indexing easier,  or index it as axes[row, col]
+    for i, (title, img) in enumerate(images):
+        row = i // n_cols
+        col = i % n_cols
+        
+        # If img is a torch tensor (C, H, W), we permute to (H, W, C) for matplotlib
+        axes[row, col].imshow(img.permute(1, 2, 0).cpu().numpy())
+        axes[row, col].set_title(title)
+        axes[row, col].axis('off') # Optional: hides the x/y ticks
+
+    plt.tight_layout()
+    plt.savefig('data/rotate_layer.png', dpi=300, bbox_inches='tight')
 
 
