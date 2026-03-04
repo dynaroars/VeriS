@@ -154,4 +154,4 @@ if __name__ == "__main__":
         axes[i].axis('off')
 
     plt.tight_layout()
-    plt.savefig('data/deform_layer.png', dpi=300, bbox_inches='tight')
+    plt.savefig('figures/deform_layer.png', dpi=300, bbox_inches='tight')

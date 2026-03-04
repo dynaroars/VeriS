@@ -8,6 +8,23 @@
 > 
 > We implement and evaluate VeriS on benchmarks involving neural networks across three domains: image classification, audio processing, and healthcare applications. Our evaluation, which encompasses 5508 verification problems, demonstrates that VeriS successfully verifies 78% of structural robustness specifications when integrated with state-of-the-art verification tools. These results show that VeriS enables the verification of complex structural perturbations that were previously beyond the reach of existing neural network verification.
 
+- Rotatation
+
+<p align="center">
+  <img src="./figures/rotate_layer.png" width='100%'/>
+</p>
+
+- Deformation
+
+<p align="center">
+  <img src="./figures/deform_layer.png" width='100%'/>
+</p>
+
+- Lightness
+
+<p align="center">
+  <img src="./figures/lightness_layer.png" width='100%'/>
+</p>
 
 ## Getting Started
 

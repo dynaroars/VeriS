@@ -87,7 +87,7 @@ class RotationPerturbationLayer(nn.Module):
 
 if __name__ == "__main__":
     torch.manual_seed(37)
-    theta_degrees = torch.tensor([0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0])
+    theta_degrees = torch.tensor([0.0, 30.0, 45.0, 60.0, 90.0, 120.0])
     
     # dataset
     transform = transforms.Compose([
@@ -103,30 +103,27 @@ if __name__ == "__main__":
     
     layer = RotationPerturbationLayer(img_tensor)
     theta_radians = torch.deg2rad(theta_degrees)
-    rotated = layer(theta_radians)
-    print(rotated.shape)
-    print(rotated.sum().item())
+    perturbed = layer(theta_radians)
     
+    print("Output Shape:", perturbed.shape, [_.sum().item() for _ in perturbed])
     
-    images = [('Original', img_tensor)]
-    for i in range(len(theta_degrees)):
-        images.append((f"Theta: {theta_degrees[i]}", rotated[i]))
+    images = [
+        ('Original', img_tensor),
+        ('theta = 0.0', perturbed[0]), 
+        ('theta = 30.0', perturbed[1]), 
+        ('theta = 45.0', perturbed[2]), 
+        ('theta = 60.0', perturbed[3]), 
+        ('theta = 90.0', perturbed[4]), 
+        ('theta = 120.0', perturbed[5]), 
+    ]
 
-    n_rows = 2
-    n_cols = len(images) // 2
-    
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(10, 5 * n_rows / 2))
-    # Flatten axes if it's a 2D array to make indexing easier,  or index it as axes[row, col]
+    fig, axes = plt.subplots(1, len(images), figsize=(12, 3))
     for i, (title, img) in enumerate(images):
-        row = i // n_cols
-        col = i % n_cols
-        
-        # If img is a torch tensor (C, H, W), we permute to (H, W, C) for matplotlib
-        axes[row, col].imshow(img.permute(1, 2, 0).cpu().numpy())
-        axes[row, col].set_title(title)
-        axes[row, col].axis('off') # Optional: hides the x/y ticks
+        axes[i].imshow(img.permute(1, 2, 0).cpu().numpy())
+        axes[i].set_title(title)
+        axes[i].axis('off')
 
     plt.tight_layout()
-    plt.savefig('data/rotate_layer.png', dpi=300, bbox_inches='tight')
+    plt.savefig('figures/rotate_layer.png', dpi=300, bbox_inches='tight')
 
 

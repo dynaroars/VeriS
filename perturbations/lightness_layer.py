@@ -93,7 +93,7 @@ if __name__ == "__main__":
     )
     
     # Define an interval of scalar inputs w
-    w_values = torch.tensor([[0.0], [0.5], [1.0], [1.5]]) # [B, 1]
+    w_values = torch.tensor([[0.0], [0.2], [0.4], [0.6], [0.8], [1.0]]) # [B, 1]
     
     perturbed = layer(w_values)
     print("Output Shape:", perturbed.shape, [_.sum().item() for _ in perturbed])
@@ -101,9 +101,11 @@ if __name__ == "__main__":
     images = [
         ('Original', img_tensor),
         ('w = 0.0', perturbed[0]), 
-        ('w = 0.5', perturbed[1]), 
-        ('w = 1.0', perturbed[2]), 
-        ('w = 1.5', perturbed[3]),
+        ('w = 0.2', perturbed[1]), 
+        ('w = 0.4', perturbed[2]), 
+        ('w = 0.6', perturbed[3]), 
+        ('w = 0.8', perturbed[4]), 
+        ('w = 1.0', perturbed[5]), 
     ]
 
     fig, axes = plt.subplots(1, len(images), figsize=(12, 3))
@@ -113,4 +115,4 @@ if __name__ == "__main__":
         axes[i].axis('off')
 
     plt.tight_layout()
-    plt.savefig('data/lightness_layer.png', dpi=300, bbox_inches='tight')
+    plt.savefig('figures/lightness_layer.png', dpi=300, bbox_inches='tight')
