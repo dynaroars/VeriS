@@ -22,6 +22,12 @@ class DeformationPerturbationLayer(nn.Module):
         self.register_buffer("image", image)
         self.register_buffer("flat_image", image.view(1, self.C, -1))
 
+        # Use a Linear layer instead of bmm/expand
+        self.image_layer = nn.Linear(self.num_pixels, self.C, bias=False)
+        with torch.no_grad():
+            self.image_layer.weight.copy_(self.flat_image.squeeze(0))
+            self.image_layer.weight.requires_grad_(False)
+
         xs = torch.arange(self.W, dtype=torch.float32)
         ys = torch.arange(self.H, dtype=torch.float32)
         grid_y, grid_x = torch.meshgrid(ys, xs, indexing="ij")
@@ -75,7 +81,6 @@ class DeformationPerturbationLayer(nn.Module):
         return 0.5 * (z + abs2relu(z))
 
     def _bilinear_sample(self, src_x: torch.Tensor, src_y: torch.Tensor) -> torch.Tensor:
-        batch_size = src_x.shape[0]
         num_coords = src_x.shape[1]
         
         # Compute separable triangular weights
@@ -85,13 +90,13 @@ class DeformationPerturbationLayer(nn.Module):
         weights_x = self._tent_weights(dx)  # [B, N, W]
         weights_y = self._tent_weights(dy)  # [B, N, H]
 
-        weights_xy = weights_y.unsqueeze(-1) * weights_x.unsqueeze(-2)  # [B, N, H, W]
-        weights_flat = weights_xy.reshape(batch_size, num_coords, -1)  # [B, N, H*W]
+        weights_x = weights_x.view(-1, num_coords, 1, self.W)
+        weights_y = weights_y.view(-1, num_coords, self.H, 1)
 
-        base = self.flat_image.expand(batch_size, -1, -1)  # [B, C, H*W]
-        base_transposed = base.permute(0, 2, 1)  # [B, H*W, C]
+        weights_xy = weights_y * weights_x  # [B, N, H, W]
+        weights_flat = weights_xy.view(-1, num_coords, self.num_pixels)  # [B, N, H*W]
 
-        sampled = torch.bmm(weights_flat, base_transposed)  # [B, N, C]
+        sampled = self.image_layer(weights_flat)  # [B, N, C]
         sampled = sampled.permute(0, 2, 1)  # [B, C, N]
         return sampled
 
@@ -99,10 +104,8 @@ class DeformationPerturbationLayer(nn.Module):
         """
         w: [B, 1] tensor representing the intensity of the deformation.
         """
-        batch_size = w.shape[0]
-        
         # Scale the base displacement field by the scalar w
-        displacement_field = w.view(batch_size, 1, 1) * self.base_displacement # [B, 2, N]
+        displacement_field = w.unsqueeze(1) * self.base_displacement # [B, 2, N]
         
         dx = displacement_field[:, 0, :] # [B, N]
         dy = displacement_field[:, 1, :] # [B, N]
@@ -112,8 +115,8 @@ class DeformationPerturbationLayer(nn.Module):
         src_y = self.base_y + dy
 
         samples = self._bilinear_sample(src_x, src_y)
-        return samples.view(batch_size, self.C, self.H, self.W)
-
+        return samples.view(w.shape[0], self.C, self.H, self.W)
+    
 if __name__ == "__main__":
     torch.manual_seed(37)
     
@@ -155,3 +158,19 @@ if __name__ == "__main__":
 
     plt.tight_layout()
     plt.savefig('figures/deform_layer.png', dpi=300, bbox_inches='tight')
+    
+
+    torch.onnx.export(
+        layer,
+        w_values,
+        "data/deform_layer.onnx",
+        opset_version=12,
+        input_names=["input"],
+        output_names=["output"],
+        dynamic_axes={
+            'input': {0: 'batch_size'},
+            'output': {0: 'batch_size'},
+        }
+    )
+
+
