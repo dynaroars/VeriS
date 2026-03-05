@@ -5,7 +5,6 @@ import torch.nn as nn
 import torchvision
 import torch
 
-
 def abs2relu(x: torch.Tensor) -> torch.Tensor:
     return 2 * torch.relu(x) - x
 
@@ -20,6 +19,12 @@ class RotationPerturbationLayer(nn.Module):
         self.register_buffer("image", image)
         self.register_buffer("flat_image", image.view(1, self.C, -1))
 
+        # Use a Linear layer instead of bmm/expand
+        self.image_layer = nn.Linear(self.num_pixels, self.C, bias=False)
+        with torch.no_grad():
+            self.image_layer.weight.copy_(self.flat_image.squeeze(0))
+            self.image_layer.weight.requires_grad_(False)
+
         c_x = (self.W - 1) / 2.0
         c_y = (self.H - 1) / 2.0
         self.register_buffer("center", torch.tensor([c_x, c_y], dtype=torch.float32))
@@ -30,8 +35,8 @@ class RotationPerturbationLayer(nn.Module):
 
         x_rel = (grid_x - c_x).reshape(1, -1)
         y_rel = (grid_y - c_y).reshape(1, -1)
-        coords = torch.cat([x_rel, y_rel], dim=0)  # [2, N]
-        self.register_buffer("relative_coords", coords)
+        self.register_buffer("x_rel", x_rel)
+        self.register_buffer("y_rel", y_rel)
 
         self.register_buffer("x_coords", xs)
         self.register_buffer("y_coords", ys)
@@ -42,7 +47,6 @@ class RotationPerturbationLayer(nn.Module):
         return 0.5 * (z + abs2relu(z))
 
     def _bilinear_sample(self, src_x: torch.Tensor, src_y: torch.Tensor) -> torch.Tensor:
-        batch_size = src_x.shape[0]
         num_coords = src_x.shape[1]
         
         # Compute separable triangular weights
@@ -52,42 +56,31 @@ class RotationPerturbationLayer(nn.Module):
         weights_x = self._tent_weights(dx)  # [B, N, W]
         weights_y = self._tent_weights(dy)  # [B, N, H]
 
-        weights_xy = weights_y.unsqueeze(-1) * weights_x.unsqueeze(-2)  # [B, N, H, W]
-        weights_flat = weights_xy.reshape(batch_size, num_coords, -1)  # [B, N, H*W]
+        weights_x = weights_x.view(-1, num_coords, 1, self.W)
+        weights_y = weights_y.view(-1, num_coords, self.H, 1)
 
-        base = self.flat_image.expand(batch_size, -1, -1)  # [B, C, H*W]
-        base_transposed = base.permute(0, 2, 1)  # [B, H*W, C]
+        weights_xy = weights_y * weights_x  # [B, N, H, W]
+        weights_flat = weights_xy.view(-1, num_coords, self.num_pixels)  # [B, N, H*W]
 
-        sampled = torch.bmm(weights_flat, base_transposed)  # [B, N, C]
+        sampled = self.image_layer(weights_flat)  # [B, N, C]
         sampled = sampled.permute(0, 2, 1)  # [B, C, N]
         return sampled
 
     def forward(self, theta) -> torch.Tensor:
-        batch_size = theta.shape[0]
+        cos_theta = torch.cos(theta)
+        sin_theta = torch.sin(theta)
 
-        cos_theta = torch.cos(theta).view(batch_size, 1, 1)
-        sin_theta = torch.sin(theta).view(batch_size, 1, 1)
-
-        rotation_matrices = torch.cat(
-            [
-                torch.cat([cos_theta, sin_theta], dim=-1),
-                torch.cat([-sin_theta, cos_theta], dim=-1),
-            ],
-            dim=-2,
-        )  # [B, 2, 2]
-
-        coords = self.relative_coords.unsqueeze(0)  # [1, 2, N]
-        rotated = rotation_matrices @ coords  # [B, 2, N]
-
-        src_x = rotated[:, 0, :] + self.center[0]
-        src_y = rotated[:, 1, :] + self.center[1]
+        # x' = x*cos + y*sin
+        src_x = (cos_theta * self.x_rel) + (sin_theta * self.y_rel) + self.center[0]
+        # y' = -x*sin + y*cos
+        src_y = (-sin_theta * self.x_rel) + (cos_theta * self.y_rel) + self.center[1]
 
         samples = self._bilinear_sample(src_x, src_y)
-        return samples.view(batch_size, self.C, self.H, self.W)
+        return samples.view(theta.shape[0], self.C, self.H, self.W)
 
 if __name__ == "__main__":
     torch.manual_seed(37)
-    theta_degrees = torch.tensor([0.0, 30.0, 45.0, 60.0, 90.0, 120.0])
+    theta_degrees = torch.tensor([0.0, 30.0, 45.0, 60.0, 90.0, 120.0]).view(-1, 1)
     
     # dataset
     transform = transforms.Compose([
@@ -125,5 +118,19 @@ if __name__ == "__main__":
 
     plt.tight_layout()
     plt.savefig('figures/rotate_layer.png', dpi=300, bbox_inches='tight')
+    
+
+    torch.onnx.export(
+        layer,
+        theta_radians,
+        "data/rotate_layer.onnx",
+        opset_version=12,
+        input_names=["input"],
+        output_names=["output"],
+        dynamic_axes={
+            'input': {0: 'batch_size'},
+            'output': {0: 'batch_size'},
+        }
+    )
 
 
