@@ -60,14 +60,8 @@ class LightnessPerturbationLayer(nn.Module):
         """
         w: [B, 1] tensor representing the intensity of the lightness perturbation.
         """
-        batch_size = w.shape[0]
-        
-        # Reshape w for broadcasting: [B, 1, 1, 1]
-        w_expanded = w.view(batch_size, 1, 1, 1)
-        
-        # Pure primitive operations: Multiply the base map by w and add to the image
-        perturbed = self.image + (w_expanded * self.base_lightness_map)
-        
+        w_expanded = w.unsqueeze(1).unsqueeze(2) # [B, 1, 1, 1]
+        perturbed = self.image + (w_expanded * self.base_lightness_map) # [B, 1, H, W]
         return perturbed
 
 if __name__ == "__main__":
@@ -116,3 +110,16 @@ if __name__ == "__main__":
 
     plt.tight_layout()
     plt.savefig('figures/lightness_layer.png', dpi=300, bbox_inches='tight')
+    
+    torch.onnx.export(
+        layer,
+        w_values,
+        "data/lightness_layer.onnx",
+        opset_version=12,
+        input_names=["input"],
+        output_names=["output"],
+        dynamic_axes={
+            'input': {0: 'batch_size'},
+            'output': {0: 'batch_size'},
+        }
+    )
