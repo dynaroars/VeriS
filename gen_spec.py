@@ -74,8 +74,8 @@ def main():
     print(f"Test accuracy: {test_acc:.4f}")
     
     if args.task == "geometric":
-        # generate_rotate_spec(args, model, test_loader, checkpoint["label_to_index"], device)
-        # generate_deform_spec(args, model, test_loader, checkpoint["label_to_index"], device)
+        generate_rotate_spec(args, model, test_loader, checkpoint["label_to_index"], device)
+        generate_deform_spec(args, model, test_loader, checkpoint["label_to_index"], device)
         generate_lightness_spec(args, model, test_loader, checkpoint["label_to_index"], device)
     else:
         generate_time_invariant_spec(args, model, test_loader, checkpoint["label_to_index"], device)
