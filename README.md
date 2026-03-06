@@ -36,7 +36,10 @@ pip install -r requirements.txt
 
 ### 2. Download datasets
 
-- Download [CardiacArrhythmia dataset](https://physionet.org/content/challenge-2017/1.0.0/training2017.zip) and unzip it into `data/CardiacArrhythmia/` folder.
+- Download [CardiacArrhythmia dataset](https://physionet.org/files/challenge-2017/1.0.0/training2017.zip) and unzip it into `data/CardiacArrhythmia/` folder.
+    ```bash
+    wget -L -O data/CardiacArrhythmia/training2017.zip https://physionet.org/files/challenge-2017/1.0.0/training2017.zip
+    ```
 - [Google Speech Commands](https://huggingface.co/datasets/google/speech_commands) will be downloaded automatically.
 
 

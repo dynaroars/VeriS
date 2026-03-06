@@ -62,8 +62,8 @@ spec_ecg_m3:
 	python gen_spec.py --task ecg --model m3 --n_channel 32 --sample_per_class 2 --spec_dir ${GEN_SPEC_DIR}
 
 spec_geometric:
-	python gen_spec.py --task geometric --model f2 --sample_per_class 1 --spec_dir ${GEN_SPEC_DIR}
-	python gen_spec.py --task geometric --model f4 --sample_per_class 1 --spec_dir ${GEN_SPEC_DIR}
+	python gen_spec.py --task geometric --model f2 --sample_per_class 4 --spec_dir ${GEN_SPEC_DIR}
+	python gen_spec.py --task geometric --model f4 --sample_per_class 4 --spec_dir ${GEN_SPEC_DIR}
 
 spec_baseline:
 	python gen_spec_baseline.py --task kws --model m3 --n_channel 32 --sample_per_class 1 --spec_dir ${GEN_SPEC_BASELINE_DIR}

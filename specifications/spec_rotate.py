@@ -1,9 +1,9 @@
+from joblib import Parallel, delayed
+from tqdm import tqdm
 import warnings
 import torch
 import os
 import gc
-from joblib import Parallel, delayed
-from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -15,11 +15,11 @@ from utils import create_vnnlib_str, get_valid_data
             
 def _process_rotate_single_spec(args, model, spec_dir, theta, x, y, logit, count, seed):
     try:
-        base_name = f"{count}_{seed}_{args.task}_{args.model}_rotate_{theta}"
+        base_name = f"{count}_{seed}_{args.task}_{args.model}_rotate_{theta[0]}-{theta[1]}"
         onnx_name = os.path.join('onnx', f"{base_name}.onnx")
         
-        x_lb = torch.tensor([[0.0]])
-        x_ub = torch.tensor([[theta]])  
+        x_lb = torch.tensor([[theta[0]]])
+        x_ub = torch.tensor([[theta[1]]])  
         
         x_lb = torch.deg2rad(x_lb)
         x_ub = torch.deg2rad(x_ub)
@@ -80,7 +80,12 @@ def generate_rotate_spec(args, model, test_loader, label_to_index, device):
     
     tasks = []
     count = 0
-    for theta in [30.0, 45.0, 60.0]:
+    for theta in [
+            (0.0, 15.0), (0.0, 30.0), (0.0, 45.0), 
+            (15.0, 30.0), (15.0, 45.0), (15.0, 60.0), 
+            (30.0, 45.0), (30.0, 60.0), (30, 90.0), 
+            (45.0, 60.0), (45.0, 75.0), (45.0, 90.0),
+        ]:
         for x, y, logit in valid_data:
             tasks.append((args, model, spec_dir, theta, x, y, logit, count, args.seed))
             count += 1
@@ -88,6 +93,10 @@ def generate_rotate_spec(args, model, test_loader, label_to_index, device):
     results = Parallel(n_jobs=os.cpu_count() // 2)(
         delayed(_process_rotate_single_spec)(*task) for task in tqdm(tasks)
     )
+    # results = []
+    # for task in tqdm(tasks):
+    #     result = _process_rotate_single_spec(*task)
+    #     results.append(result)
     
     successful_results = []
     failed_results = []

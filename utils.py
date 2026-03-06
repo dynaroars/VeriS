@@ -46,6 +46,7 @@ def load_checkpoint(path: str) -> Dict[str, Any]:
 
 def evaluate_model(model: nn.Module, test_loader: DataLoader, device: torch.device) -> float:
     """Evaluate the model on the test set and return accuracy."""
+    print(f"Evaluating model on {len(test_loader.dataset)} samples (device: {device})...")
     model.eval()
     correct = 0
     total = 0

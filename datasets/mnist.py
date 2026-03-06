@@ -58,8 +58,7 @@ def build_mnist_datasets(
     """
     ds_train = MNISTDataset(root, "train", download=download)
     ds_val = MNISTDataset(root, "val", download=download)
-    ds_test = MNISTDataset(root, "test", download=download)
 
     label_mapping = ds_train.label_to_index
 
-    return ds_train, ds_val, ds_test, label_mapping
+    return ds_train, ds_val, ds_val, label_mapping

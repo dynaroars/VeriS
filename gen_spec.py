@@ -60,7 +60,15 @@ def main():
     model.eval()
     
     # evaluate model
-    test_acc = evaluate_model(model, test_loader, device)
+    test_loader_accuracy = DataLoader(
+        test_ds, 
+        batch_size=128, 
+        shuffle=False,
+        num_workers=os.cpu_count(), 
+        pin_memory=True, 
+        drop_last=False,
+    )
+    test_acc = evaluate_model(model, test_loader_accuracy, device)
     print(f"Test accuracy: {test_acc:.4f}")
     
     if args.task == "geometric":

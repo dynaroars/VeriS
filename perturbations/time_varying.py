@@ -1,10 +1,6 @@
-import torch
 import torch.nn as nn
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import math
-import os
+import torch
 
 class TimeVaryingPerturbationLayer(nn.Module):
 
@@ -83,7 +79,7 @@ class TimeVaryingPerturbationLayer(nn.Module):
         s = w * self.coeffs + self.n
         # assert torch.allclose(s, s1, atol=1e-6)
         # d = s - k
-        d = s.unsqueeze(2) - self.k            # [B, T, T]
+        d = s.unsqueeze(2) - self.k # [B, T, T]
         # P = ψ(s - k), where ψ(x) = ReLU(1 - |x|)
         # P  = torch.relu(1.0 - torch.abs(d))
         # no abs 
@@ -103,14 +99,12 @@ class TimeVaryingPerturbationLayer(nn.Module):
         # compute s = n + u using linear layer
         s = self.s_layer(w)  # [B, T]
         # d = s - k
-        d = s.unsqueeze(2) - self.k            # [B, T, T]
+        d = s.unsqueeze(2) - self.k # [B, T, T]
         # P = ψ(s - k), where ψ(x) = ReLU(1 - |x|)
         # P  = torch.relu(1.0 - torch.abs(d))
         # no abs 
         P = torch.relu(1.0 - torch.relu(d) - torch.relu(-d))  # ψ(d) = ReLU(1 - ReLU(d) - ReLU(-d)) # [B, T, T]
-        
-        print(f'{P=}')
-        
+        # print(f'{P=}')
         # Weighted sum over k
         warped = self.warped_layer(P)
         return warped
