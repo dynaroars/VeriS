@@ -11,6 +11,7 @@ warnings.filterwarnings("ignore", message=".*TorchScript-based ONNX export.*")
 from utils import set_seed, get_device, load_checkpoint, evaluate_model, get_model, get_datasets, get_checkpoint_path
 from specifications.spec_time_invariant import generate_time_invariant_spec
 from specifications.spec_time_varying import generate_time_varying_spec
+from specifications.spec_lightness import generate_lightness_spec
 from specifications.spec_rotate import generate_rotate_spec
 from specifications.spec_deform import generate_deform_spec
 
@@ -73,8 +74,9 @@ def main():
     print(f"Test accuracy: {test_acc:.4f}")
     
     if args.task == "geometric":
-        generate_rotate_spec(args, model, test_loader, checkpoint["label_to_index"], device)
-        generate_deform_spec(args, model, test_loader, checkpoint["label_to_index"], device)
+        # generate_rotate_spec(args, model, test_loader, checkpoint["label_to_index"], device)
+        # generate_deform_spec(args, model, test_loader, checkpoint["label_to_index"], device)
+        generate_lightness_spec(args, model, test_loader, checkpoint["label_to_index"], device)
     else:
         generate_time_invariant_spec(args, model, test_loader, checkpoint["label_to_index"], device)
         generate_time_varying_spec(args, model, test_loader, checkpoint["label_to_index"], device)
