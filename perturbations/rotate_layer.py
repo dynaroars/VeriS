@@ -100,15 +100,9 @@ if __name__ == "__main__":
     
     print("Output Shape:", perturbed.shape, [_.sum().item() for _ in perturbed])
     
-    images = [
-        ('Original', img_tensor),
-        ('theta = 0.0', perturbed[0]), 
-        ('theta = 30.0', perturbed[1]), 
-        ('theta = 45.0', perturbed[2]), 
-        ('theta = 60.0', perturbed[3]), 
-        ('theta = 90.0', perturbed[4]), 
-        ('theta = 120.0', perturbed[5]), 
-    ]
+    images = [('Original', img_tensor)]
+    for i in range(len(theta_degrees)):
+        images.append((f'theta = {theta_degrees[i].item()}', perturbed[i]))
 
     fig, axes = plt.subplots(1, len(images), figsize=(12, 3))
     for i, (title, img) in enumerate(images):

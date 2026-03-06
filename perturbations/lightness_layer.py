@@ -80,33 +80,44 @@ if __name__ == "__main__":
         
     # Test the layer with the "spotlight" type targeting the center
     # This will simulate a localized glow/lightness increase
-    layer = LightnessPerturbationLayer(
-        img_tensor, 
-        lightness_type='spotlight', 
-        max_delta=3.0,
-    )
+
     
     # Define an interval of scalar inputs w
     w_values = torch.tensor([[0.0], [0.2], [0.4], [0.6], [0.8], [1.0]]) # [B, 1]
+    max_delta_dict = {
+        'spotlight': 1.5,
+        'gradient_x': 1.5,
+    }
     
-    perturbed = layer(w_values)
-    print("Output Shape:", perturbed.shape, [_.sum().item() for _ in perturbed])
-    
-    images = [
-        ('Original', img_tensor),
-        ('w = 0.0', perturbed[0]), 
-        ('w = 0.2', perturbed[1]), 
-        ('w = 0.4', perturbed[2]), 
-        ('w = 0.6', perturbed[3]), 
-        ('w = 0.8', perturbed[4]), 
-        ('w = 1.0', perturbed[5]), 
-    ]
+    lightness_types = ['spotlight', 'gradient_x']
+    fig = plt.figure(figsize=(12, 3 * len(lightness_types)))
+    # Create a vertical grid of subfigures (one for each row)
+    subfigs = fig.subfigures(len(lightness_types), 1)
 
-    fig, axes = plt.subplots(1, len(images), figsize=(12, 3))
-    for i, (title, img) in enumerate(images):
-        axes[i].imshow(img.permute(1, 2, 0).cpu().numpy())
-        axes[i].set_title(title)
-        axes[i].axis('off')
+    for idx, lightness_type in enumerate(lightness_types):
+        # Add the centered subtitle for this specific row
+        subfigs[idx].suptitle(lightness_type.replace('_', ' ').capitalize(), fontsize=14, fontweight='bold')
+        
+        # Create the axes inside this row's subfigure
+        num_cols = len(w_values) + 1
+        axes = subfigs[idx].subplots(1, num_cols)
+        
+        layer = LightnessPerturbationLayer(
+            image=img_tensor, 
+            lightness_type=lightness_type, 
+            max_delta=max_delta_dict[lightness_type],
+        )
+        deformed = layer(w_values)
+        
+        images = [('Original', img_tensor)]
+        for i in range(len(w_values)):
+            images.append((f'w = {w_values[i].item():.01f}', deformed[i]))
+            
+        for i, (title, img) in enumerate(images):
+            axes[i].imshow(img.permute(1, 2, 0).cpu().numpy())
+            axes[i].set_title(title)
+            axes[i].axis('off')
+
 
     plt.tight_layout()
     plt.savefig('figures/lightness_layer.png', dpi=300, bbox_inches='tight')

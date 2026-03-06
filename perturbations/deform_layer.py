@@ -131,30 +131,49 @@ if __name__ == "__main__":
         img_tensor = img.squeeze(0)
         break
         
-    # Test the layer with the new "localized_bulge" type
-    layer = DeformationPerturbationLayer(img_tensor, displacement_type='sine_ripple', max_displacement=1.5)
-    
     # Define an interval of scalar inputs w
     w_values = torch.tensor([[0.0], [0.2], [0.4], [0.6], [0.8], [1.0]]) # [B, 1]
+    max_displacement_dict = {
+        'sine_ripple': 3,
+        'expansion': 0.3,
+        'localized_bulge': 1,
+    }
     
-    deformed = layer(w_values)
-    print("Output Shape:", deformed.shape)
-    
-    images = [
-        ('Original', img_tensor),
-        ('w = 0.0', deformed[0]), 
-        ('w = 0.2', deformed[1]), 
-        ('w = 0.4', deformed[2]), 
-        ('w = 0.6', deformed[3]), 
-        ('w = 0.8', deformed[4]), 
-        ('w = 1.0', deformed[5]),
-    ]
+    center_dict = {
+        'sine_ripple': None,
+        'expansion': None,
+        'localized_bulge': (16, 8),
+    }
+        
+    displacement_types = ['sine_ripple', 'expansion', 'localized_bulge']
+    fig = plt.figure(figsize=(12, 3 * len(displacement_types)))
+    # Create a vertical grid of subfigures (one for each row)
+    subfigs = fig.subfigures(len(displacement_types), 1)
 
-    fig, axes = plt.subplots(1, len(images), figsize=(12, 3))
-    for i, (title, img) in enumerate(images):
-        axes[i].imshow(img.permute(1, 2, 0).cpu().numpy())
-        axes[i].set_title(title)
-        axes[i].axis('off')
+    for idx, displacement_type in enumerate(displacement_types):
+        # Add the centered subtitle for this specific row
+        subfigs[idx].suptitle(displacement_type.replace('_', ' ').capitalize(), fontsize=14, fontweight='bold')
+        
+        # Create the axes inside this row's subfigure
+        num_cols = len(w_values) + 1
+        axes = subfigs[idx].subplots(1, num_cols)
+        
+        layer = DeformationPerturbationLayer(
+            image=img_tensor, 
+            displacement_type=displacement_type, 
+            max_displacement=max_displacement_dict[displacement_type],
+            center=center_dict[displacement_type],
+        )
+        deformed = layer(w_values)
+        
+        images = [('Original', img_tensor)]
+        for i in range(len(w_values)):
+            images.append((f'w = {w_values[i].item():.01f}', deformed[i]))
+            
+        for i, (title, img) in enumerate(images):
+            axes[i].imshow(img.permute(1, 2, 0).cpu().numpy())
+            axes[i].set_title(title)
+            axes[i].axis('off')
 
     plt.tight_layout()
     plt.savefig('figures/deform_layer.png', dpi=300, bbox_inches='tight')
