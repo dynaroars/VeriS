@@ -130,6 +130,8 @@ if __name__ == "__main__":
     for img, _ in dataloader:
         img_tensor = img.squeeze(0)
         break
+    
+    print("Image tensor shape:", img_tensor.shape, (torch.min(img_tensor).item(), torch.max(img_tensor).item()))
         
     # Define an interval of scalar inputs w
     w_values = torch.tensor([[0.0], [0.2], [0.4], [0.6], [0.8], [1.0]]) # [B, 1]
@@ -164,11 +166,14 @@ if __name__ == "__main__":
             max_displacement=max_displacement_dict[displacement_type],
             center=center_dict[displacement_type],
         )
-        deformed = layer(w_values)
+        perturbed = layer(w_values)
+        print(f"{perturbed.shape=}")
+        for i, _ in enumerate(perturbed):
+            print(f'\t+ w={w_values[i].item():.02f}, sum={_.sum().item():.02f}, min={torch.min(_).item():.02f}, max={torch.max(_).item():.02f}')
         
         images = [('Original', img_tensor)]
         for i in range(len(w_values)):
-            images.append((f'w = {w_values[i].item():.01f}', deformed[i]))
+            images.append((f'w = {w_values[i].item():.01f}', perturbed[i]))
             
         for i, (title, img) in enumerate(images):
             axes[i].imshow(img.permute(1, 2, 0).cpu().numpy())

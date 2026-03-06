@@ -107,11 +107,15 @@ if __name__ == "__main__":
             lightness_type=lightness_type, 
             max_delta=max_delta_dict[lightness_type],
         )
-        deformed = layer(w_values)
+        perturbed = layer(w_values)
+        
+        print(f"{perturbed.shape=}")
+        for i, _ in enumerate(perturbed):
+            print(f'\t+ w={w_values[i].item():.02f}, sum={_.sum().item():.02f}, min={torch.min(_).item():.02f}, max={torch.max(_).item():.02f}')
         
         images = [('Original', img_tensor)]
         for i in range(len(w_values)):
-            images.append((f'w = {w_values[i].item():.01f}', deformed[i]))
+            images.append((f'w = {w_values[i].item():.01f}', perturbed[i]))
             
         for i, (title, img) in enumerate(images):
             axes[i].imshow(img.permute(1, 2, 0).cpu().numpy())
