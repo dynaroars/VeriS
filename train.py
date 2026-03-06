@@ -7,13 +7,13 @@ import os
 
 warnings.filterwarnings("ignore")
 
-from utils import set_seed, get_device, save_checkpoint, get_model_parameters, evaluate_model, get_model, get_datasets
+from utils import set_seed, get_device, save_checkpoint, get_model_parameters, evaluate_model, get_model, get_datasets, get_checkpoint_path
 from engine.trainer import Trainer
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--task", type=str, required=True, choices=["kws", "ecg"])
-    p.add_argument("--model", type=str, default="m5", choices=["m5", "m3"])
+    p.add_argument("--task", type=str, required=True, choices=["kws", "ecg", "geometric"])
+    p.add_argument("--model", type=str, default="m5", choices=["m5", "m3", "f2", "f4"])
     p.add_argument("--n_channel", type=int, default=32)
     p.add_argument("--data_dir", type=str, default="./data", help="Root directory for data")
     p.add_argument("--batch_size", type=int, default=32)
@@ -32,7 +32,7 @@ def main():
     args = parse_args()
     set_seed(args.seed)
     
-    checkpoint_path = os.path.join(args.checkpoint_dir, f"{args.task}_{args.model}_{args.n_channel}.pt")
+    checkpoint_path = get_checkpoint_path(args)
     if os.path.exists(checkpoint_path):
         print(f"Checkpoint found at {checkpoint_path}. Done.")
         return

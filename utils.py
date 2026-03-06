@@ -2,14 +2,16 @@ from torch.utils.data import DataLoader
 from typing import Any, Dict
 import torch.nn as nn
 import numpy as np
+import argparse
 import random
 import torch
 import os
 
 from datasets.ecg import build_cardiac_arrhythmia_datasets
 from datasets.gsc import build_speech_commands_datasets
+from datasets.mnist import build_mnist_datasets
 from models.cnn import M5, M3
-
+from models.fnn import F2, F4
 
 def recursive_walk(rootdir):
     for r, dirs, files in os.walk(rootdir):
@@ -28,6 +30,12 @@ def get_device() -> torch.device:
 
 def get_model_parameters(model: torch.nn.Module) -> int:
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+def get_checkpoint_path(args: argparse.Namespace) -> str:
+    if args.task == "geometric":
+        return os.path.join(args.checkpoint_dir, f"{args.task}_{args.model}.pt")
+    else:
+        return os.path.join(args.checkpoint_dir, f"{args.task}_{args.model}_{args.n_channel}.pt")
 
 def save_checkpoint(path: str, state: Dict[str, Any]):
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -128,6 +136,21 @@ def get_model(args, num_classes: int) -> nn.Module:
             )
         else:
             raise ValueError(f"Unknown model: {args.model}")
+    elif args.task == "geometric":
+        if args.model == "f2":
+            model = F2(
+                input_size=784,
+                hidden_size=256,
+                output_size=num_classes,
+            )
+        elif args.model == "f4":
+            model = F4(
+                input_size=784,
+                hidden_size=256,
+                output_size=num_classes,
+            )
+        else:
+            raise ValueError(f"Unknown model: {args.model}")
     else:
         raise ValueError(f"Unknown task: {args.task}")
     return model
@@ -155,6 +178,35 @@ def get_datasets(args):
         )
         num_classes = len(label_mapping)
         print(f"Classes: {num_classes=}")
+    elif args.task == "geometric":
+        train_ds, val_ds, test_ds, label_mapping = build_mnist_datasets(
+            root=args.data_dir,
+            download=True,
+        )
+        num_classes = len(label_mapping)
+        print(f"Classes: {num_classes=}")
     else:
         raise ValueError(f"Unknown task: {args.task}")
     return train_ds, val_ds, test_ds, label_mapping, num_classes
+
+
+def get_valid_data(args, model, test_loader, label_to_index, device):
+    valid_data = []
+    sample_per_class = {v: args.sample_per_class for v in label_to_index.values()}
+    model.to(device)
+    for x, y in test_loader:
+        x = x.to(device)
+        y = y.to(device).item()
+        if not sample_per_class[y]:
+            continue
+        logit = model(x)
+        pred = logit.argmax(-1).item()
+        if pred != y:
+            continue
+        assert y in sample_per_class
+        sample_per_class[y] -= 1
+        valid_data.append((x.cpu(), y, logit))
+        if sum(sample_per_class.values()) == 0:
+            break
+    print(f"Found {len(valid_data)=} {[v[1] for v in valid_data]}")
+    return valid_data

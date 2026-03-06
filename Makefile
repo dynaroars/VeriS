@@ -13,9 +13,9 @@ ABCROWN_DIR=../exp/abcrown/complete_verifier/
 
 all: train spec verify
 
-train: train_kws_m5 train_kws_m3 train_ecg_m5 train_ecg_m3
+train: train_kws_m5 train_kws_m3 train_ecg_m5 train_ecg_m3 train_geometric
 
-spec: spec_kws_m5 spec_kws_m3 spec_ecg_m5 spec_ecg_m3
+spec: spec_kws_m5 spec_kws_m3 spec_ecg_m5 spec_ecg_m3 spec_geometric
 
 verify_neuralsat: verify_neuralsat_invariant verify_neuralsat_varying
 
@@ -40,6 +40,10 @@ train_ecg_m3:
 	python train.py --task ecg --model m3 --epochs ${EPOCHS} --n_channel 64
 	python train.py --task ecg --model m3 --epochs ${EPOCHS} --n_channel 32
 
+train_geometric:
+	python train.py --task geometric --model f2 --epochs ${EPOCHS}
+	python train.py --task geometric --model f4 --epochs ${EPOCHS}
+
 # Generating specs
 spec_kws_m5:
 	python gen_spec.py --task kws --model m5 --n_channel 64 --sample_per_class 1 --spec_dir ${GEN_SPEC_DIR}
@@ -56,6 +60,10 @@ spec_ecg_m5:
 spec_ecg_m3:
 	python gen_spec.py --task ecg --model m3 --n_channel 64 --sample_per_class 2 --spec_dir ${GEN_SPEC_DIR}
 	python gen_spec.py --task ecg --model m3 --n_channel 32 --sample_per_class 2 --spec_dir ${GEN_SPEC_DIR}
+
+spec_geometric:
+	python gen_spec.py --task geometric --model f2 --sample_per_class 1 --spec_dir ${GEN_SPEC_DIR}
+	python gen_spec.py --task geometric --model f4 --sample_per_class 1 --spec_dir ${GEN_SPEC_DIR}
 
 spec_baseline:
 	python gen_spec_baseline.py --task kws --model m3 --n_channel 32 --sample_per_class 1 --spec_dir ${GEN_SPEC_BASELINE_DIR}

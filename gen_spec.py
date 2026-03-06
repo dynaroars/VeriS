@@ -11,15 +11,15 @@ warnings.filterwarnings("ignore")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", message=".*TorchScript-based ONNX export.*")
 
-from utils import set_seed, get_device, load_checkpoint, evaluate_model, create_vnnlib_str, get_model, get_datasets
+from utils import set_seed, get_device, load_checkpoint, evaluate_model, create_vnnlib_str, get_model, get_datasets, get_checkpoint_path, get_valid_data
 from perturbations.time_invariant import TimeInvariantPerturbationLayer
 from perturbations.time_varying import TimeVaryingPerturbationLayer
 
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--seed", type=int, default=42)
-    p.add_argument("--task", type=str, required=True, choices=["kws", "ecg"])
-    p.add_argument("--model", type=str, default="m5", choices=["m5", "m3"])
+    p.add_argument("--task", type=str, required=True, choices=["kws", "ecg", "geometric"])
+    p.add_argument("--model", type=str, default="m5", choices=["m5", "m3", "f2", "f4"])
     p.add_argument("--n_channel", type=int, default=32)
     p.add_argument("--sample_per_class", type=int, default=1)
     p.add_argument("--timeout", type=int, default=30)
@@ -31,28 +31,6 @@ def parse_args():
     os.makedirs(args.data_dir, exist_ok=True)
     os.makedirs(args.spec_dir, exist_ok=True)
     return args
-
-
-def get_valid_data(args, model, test_loader, label_to_index, device):
-    valid_data = []
-    sample_per_class = {v: args.sample_per_class for v in label_to_index.values()}
-    model.to(device)
-    for x, y in test_loader:
-        x = x.to(device)
-        y = y.to(device).item()
-        if not sample_per_class[y]:
-            continue
-        logit = model(x)
-        pred = logit.argmax(-1).item()
-        if pred != y:
-            continue
-        assert y in sample_per_class
-        sample_per_class[y] -= 1
-        valid_data.append((x.cpu(), y, logit))
-        if sum(sample_per_class.values()) == 0:
-            break
-    print(f"Found {len(valid_data)=} {[v[1] for v in valid_data]}")
-    return valid_data
 
 
 def generate_time_invariant_spec(args, model, test_loader, label_to_index, device):
@@ -275,7 +253,7 @@ def main():
     model.to(device)
     
     # load checkpoint
-    checkpoint_path = os.path.join(args.checkpoint_dir, f"{args.task}_{args.model}_{args.n_channel}.pt")
+    checkpoint_path = get_checkpoint_path(args)
     checkpoint = load_checkpoint(checkpoint_path)
     model.load_state_dict(checkpoint["model_state"])
     model.eval()
@@ -286,6 +264,7 @@ def main():
     
     generate_time_invariant_spec(args, model, test_loader, checkpoint["label_to_index"], device)
     generate_time_varying_spec(args, model, test_loader, checkpoint["label_to_index"], device)
-
+    generate_rotate_spec(args, model, test_loader, checkpoint["label_to_index"], device)
+    
 if __name__ == "__main__":
     main()
