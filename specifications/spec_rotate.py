@@ -73,7 +73,7 @@ def generate_rotate_spec(args, model, test_loader, label_to_index, device):
     
     valid_data = get_valid_data(args, model, test_loader, label_to_index, device)
     
-    spec_dir = os.path.join(args.spec_dir, f'rotate', f'{args.task}_{args.model}_{args.n_channel}')
+    spec_dir = os.path.join(args.spec_dir, args.task, f'rotate_{args.model}')
     os.makedirs(os.path.join(spec_dir, 'vnnlib'), exist_ok=True)
     os.makedirs(os.path.join(spec_dir, 'onnx'), exist_ok=True)
     os.makedirs(spec_dir, exist_ok=True)

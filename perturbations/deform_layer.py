@@ -132,7 +132,7 @@ if __name__ == "__main__":
         break
         
     # Test the layer with the new "localized_bulge" type
-    layer = DeformationPerturbationLayer(img_tensor, displacement_type='localized_bulge', max_displacement=1.0, center=(16.0, 7.0))
+    layer = DeformationPerturbationLayer(img_tensor, displacement_type='sine_ripple', max_displacement=1.5)
     
     # Define an interval of scalar inputs w
     w_values = torch.tensor([[0.0], [0.2], [0.4], [0.6], [0.8], [1.0]]) # [B, 1]

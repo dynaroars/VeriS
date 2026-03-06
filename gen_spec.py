@@ -12,6 +12,7 @@ from utils import set_seed, get_device, load_checkpoint, evaluate_model, get_mod
 from specifications.spec_time_invariant import generate_time_invariant_spec
 from specifications.spec_time_varying import generate_time_varying_spec
 from specifications.spec_rotate import generate_rotate_spec
+from specifications.spec_deform import generate_deform_spec
 
 def parse_args():
     p = argparse.ArgumentParser()
@@ -73,6 +74,7 @@ def main():
     
     if args.task == "geometric":
         generate_rotate_spec(args, model, test_loader, checkpoint["label_to_index"], device)
+        generate_deform_spec(args, model, test_loader, checkpoint["label_to_index"], device)
     else:
         generate_time_invariant_spec(args, model, test_loader, checkpoint["label_to_index"], device)
         generate_time_varying_spec(args, model, test_loader, checkpoint["label_to_index"], device)

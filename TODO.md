@@ -1,0 +1,1 @@
+- [ ] Expansion with large `max_displacement` (2.0) and `w` (1.0) flips the image instead of expanding
