@@ -34,13 +34,13 @@
 pip install -r requirements.txt
 ```
 
-### 2. Download datasets
+### 2. Datasets
 
 - Download [CardiacArrhythmia dataset](https://physionet.org/files/challenge-2017/1.0.0/training2017.zip) and unzip it into `data/CardiacArrhythmia/` folder.
     ```bash
     wget -L -O data/CardiacArrhythmia/training2017.zip https://physionet.org/files/challenge-2017/1.0.0/training2017.zip
     ```
-- [Google Speech Commands](https://huggingface.co/datasets/google/speech_commands) will be downloaded automatically.
+- Google Speech Commands and MNIST datasets will be downloaded automatically.
 
 
 ### 3. Train models
@@ -112,3 +112,17 @@ pip install -r requirements.txt
     ```bash
     make create_table
     ```
+
+# Citation
+
+```
+@article{duong2026verifying,
+  title={{Verifying Structural Robustness of Deep Neural Network}},
+  author = {Duong, Hai and Le, Thanh and Nguyen, Lam and Nguyen, ThanhVu},
+  journal={Proceedings of the ACM on Software Engineering},
+  volume={3},
+  number={FSE},
+  year={2026},
+  pages={to appear}
+}
+```
