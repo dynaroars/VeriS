@@ -5,6 +5,7 @@ data/
 log/
 misc/
 results/
+exp/
 
 rac/
 venv/
