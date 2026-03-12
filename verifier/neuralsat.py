@@ -17,6 +17,8 @@ def verify(args, onnx_path, vnnlib_path, output_path, timeout):
         setting_path = os.path.join(args.home_dir, 'verifier/config/neuralsat/time_invariant.json')
     elif args.benchmark_type == 'time_varying':
         setting_path = os.path.join(args.home_dir, 'verifier/config/neuralsat/time_varying.json')
+    elif args.benchmark_type == 'geometric':
+        setting_path = os.path.join(args.home_dir, 'verifier/config/neuralsat/geometric.json')
     else:
         raise ValueError(f'Invalid benchmark type: {args.benchmark_type=}')
     

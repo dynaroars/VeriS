@@ -14,6 +14,8 @@ def verify(args, onnx_path, vnnlib_path, output_path, timeout):
         setting_path = os.path.join(args.home_dir, 'verifier/config/abcrown_A/time_invariant.yaml')
     elif args.benchmark_type == 'time_varying':
         setting_path = os.path.join(args.home_dir, 'verifier/config/abcrown_A/time_varying.yaml')
+    elif args.benchmark_type == 'geometric':
+        setting_path = os.path.join(args.home_dir, 'verifier/config/abcrown_A/geometric.yaml')
     else:
         raise ValueError(f'Invalid benchmark type: {args.benchmark_type=}')
     

@@ -8,7 +8,7 @@ from utils import recursive_walk
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--benchmark_dir", type=str, default="generated_benchmark/", help="Root directory for benchmark")
-    p.add_argument("--benchmark_type", type=str, required=True, choices=["time_invariant", "time_varying"])
+    p.add_argument("--benchmark_type", type=str, required=True, choices=["time_invariant", "time_varying", "geometric"])
     p.add_argument("--verifier", type=str, required=True, choices=["neuralsat", "abcrown", "abcrown_A"])
     p.add_argument("--verifier_dir", type=str, required=True, help="Verifier directory")
     p.add_argument("--home_dir", type=str, default=os.getcwd(), help="Home directory for verifier")

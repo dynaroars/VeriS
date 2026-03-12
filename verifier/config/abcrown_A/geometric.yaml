@@ -1,0 +1,9 @@
+general:
+  enable_incomplete_verification: False
+model:
+  onnx_quirks: "{'Reshape': {'fix_batch_size': True}}"
+solver:
+  crown:
+    batch_size: 32
+attack:
+  pgd_order: before
