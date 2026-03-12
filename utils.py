@@ -62,7 +62,7 @@ def evaluate_model(model: nn.Module, test_loader: DataLoader, device: torch.devi
     return test_acc
 
 
-def create_vnnlib_str(data_lb: torch.Tensor, data_ub: torch.Tensor, prediction: torch.Tensor, max_specs: int = 1):
+def create_vnnlib_str(data_lb: torch.Tensor, data_ub: torch.Tensor, prediction: torch.Tensor):
     # input bounds
     x_lb = data_lb.flatten()
     x_ub = data_ub.flatten()
@@ -86,16 +86,14 @@ def create_vnnlib_str(data_lb: torch.Tensor, data_ub: torch.Tensor, prediction: 
         base_str += f"(assert (>= X_{i} {x_lb[i]:.8f}))\n\n"
 
     base_str += f"\n; Definition of output constraints\n"
-    specs = []
+    spec_i = base_str
+    spec_i += f"(assert (or\n"
     for i in range(n_class):
         if i == y:
             continue
-        spec_i = base_str
-        spec_i += f"(assert (or\n"
         spec_i += f"\t(and (>= Y_{i} Y_{y}))\n"
-        spec_i += f"))\n"
-        specs.append(spec_i)
-    return specs[:max_specs]
+    spec_i += f"))\n"
+    return [spec_i]
         
         
 def get_model(args, num_classes: int) -> nn.Module:
