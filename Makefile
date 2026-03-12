@@ -1,7 +1,8 @@
 EPOCHS=50
 GEN_SPEC_DIR=generated_benchmark_new/
 RESULTS_DIR=./exp/results_optimized/
-TIMEOUT=120
+TIMEOUT=300
+TIMEOUT_EXTENDED=600
 
 GEN_SPEC_BASELINE_DIR=generated_benchmark_baseline/
 RESULTS_DIR_BASELINE=./exp/results_baseline/
@@ -86,28 +87,28 @@ verify_neuralsat_invariant:
 	python verify.py --benchmark_type time_invariant --verifier neuralsat --verifier_dir ${NEURALSAT_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT} --benchmark_dir ${GEN_SPEC_DIR}
 
 verify_neuralsat_varying:
-	python verify.py --benchmark_type time_varying   --verifier neuralsat --verifier_dir ${NEURALSAT_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT} --benchmark_dir ${GEN_SPEC_DIR}
+	python verify.py --benchmark_type time_varying   --verifier neuralsat --verifier_dir ${NEURALSAT_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT_EXTENDED} --benchmark_dir ${GEN_SPEC_DIR}
 
 verify_neuralsat_geometric:
-	python verify.py --benchmark_type geometric 	 --verifier neuralsat --verifier_dir ${NEURALSAT_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT} --benchmark_dir ${GEN_SPEC_DIR}
+	python verify.py --benchmark_type geometric 	 --verifier neuralsat --verifier_dir ${NEURALSAT_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT_EXTENDED} --benchmark_dir ${GEN_SPEC_DIR}
 
 verify_abcrown_invariant:
 	python verify.py --benchmark_type time_invariant --verifier abcrown --verifier_dir ${ABCROWN_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT} --benchmark_dir ${GEN_SPEC_DIR}
 
 verify_abcrown_varying:
-	python verify.py --benchmark_type time_varying   --verifier abcrown --verifier_dir ${ABCROWN_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT} --benchmark_dir ${GEN_SPEC_DIR}
+	python verify.py --benchmark_type time_varying   --verifier abcrown --verifier_dir ${ABCROWN_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT_EXTENDED} --benchmark_dir ${GEN_SPEC_DIR}
 
 verify_abcrown_geometric:
-	python verify.py --benchmark_type geometric 	 --verifier abcrown --verifier_dir ${ABCROWN_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT} --benchmark_dir ${GEN_SPEC_DIR}
+	python verify.py --benchmark_type geometric 	 --verifier abcrown --verifier_dir ${ABCROWN_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT_EXTENDED} --benchmark_dir ${GEN_SPEC_DIR}
 
 verify_abcrown_A_invariant:
 	python verify.py --benchmark_type time_invariant --verifier abcrown_A --verifier_dir ${ABCROWN_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT} --benchmark_dir ${GEN_SPEC_DIR}
 
 verify_abcrown_A_varying:
-	python verify.py --benchmark_type time_varying   --verifier abcrown_A --verifier_dir ${ABCROWN_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT} --benchmark_dir ${GEN_SPEC_DIR}
+	python verify.py --benchmark_type time_varying   --verifier abcrown_A --verifier_dir ${ABCROWN_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT_EXTENDED} --benchmark_dir ${GEN_SPEC_DIR}
 
 verify_abcrown_A_geometric:
-	python verify.py --benchmark_type geometric 	 --verifier abcrown_A --verifier_dir ${ABCROWN_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT} --benchmark_dir ${GEN_SPEC_DIR}
+	python verify.py --benchmark_type geometric 	 --verifier abcrown_A --verifier_dir ${ABCROWN_DIR} --output_dir ${RESULTS_DIR} --timeout ${TIMEOUT_EXTENDED} --benchmark_dir ${GEN_SPEC_DIR}
 
 create_csv:
 	python plot/export_results.py --output_dir ${RESULTS_DIR} --benchmark_dir ${GEN_SPEC_DIR}
