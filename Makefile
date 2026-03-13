@@ -19,7 +19,7 @@ train: train_kws_m5 train_kws_m3 train_ecg_m5 train_ecg_m3 train_geometric
 
 spec: spec_kws_m5 spec_kws_m3 spec_ecg_m5 spec_ecg_m3 spec_geometric
 
-verify_neuralsat: verify_neuralsat_invariant verify_neuralsat_varying verify_neuralsat_geometric
+verify_neuralsat: verify_neuralsat_invariant verify_neuralsat_geometric verify_neuralsat_varying
 
 verify_abcrown: verify_abcrown_invariant verify_abcrown_varying verify_abcrown_A_invariant verify_abcrown_A_varying verify_abcrown_geometric verify_abcrown_A_geometric
 

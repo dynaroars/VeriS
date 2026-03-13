@@ -2,7 +2,7 @@ import psutil
 import time
 import os
 
-TIMEOUT = 60
+TIMEOUT = 600
 
 def killer():
     instances = []

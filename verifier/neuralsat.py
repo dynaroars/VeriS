@@ -13,12 +13,14 @@ def verify(args, onnx_path, vnnlib_path, output_path, timeout):
     
     os.chdir(args.verifier_dir)
     
+    batch_size = None
     if args.benchmark_type == 'time_invariant':
         setting_path = os.path.join(args.home_dir, 'verifier/config/neuralsat/time_invariant.json')
     elif args.benchmark_type == 'time_varying':
         setting_path = os.path.join(args.home_dir, 'verifier/config/neuralsat/time_varying.json')
     elif args.benchmark_type == 'geometric':
         setting_path = os.path.join(args.home_dir, 'verifier/config/neuralsat/geometric.json')
+        batch_size = 10
     else:
         raise ValueError(f'Invalid benchmark type: {args.benchmark_type=}')
     
@@ -26,6 +28,8 @@ def verify(args, onnx_path, vnnlib_path, output_path, timeout):
     
     cmd  = f'python3 -W ignore main.py --verbosity=2'
     cmd += f' --net {onnx_path} --spec {vnnlib_path} --timeout {timeout}'
+    if batch_size is not None:
+        cmd += f' --batch {batch_size}'
     cmd += f' --result_file {result_path}'
     cmd += f' --setting_file {setting_path}'
     cmd += f' --export_runtime'
