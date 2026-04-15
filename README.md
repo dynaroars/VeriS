@@ -82,8 +82,8 @@ pip install -r requirements.txt
 
 #### 5.1. Download verifiers
 
-- Download [alpha-beta-CROWN](https://github.com/Verified-Intelligence/alpha-beta-CROWN) and store at `../exp/abcrown/` (default location in [Makefile](Makefile))
-- Download [NeuralSAT](https://github.com/dynaroars/neuralsat) and store at `../exp/neuralsat/` (default location in [Makefile](Makefile))
+- Clone [alpha-beta-CROWN](https://github.com/Verified-Intelligence/alpha-beta-CROWN) to `../exp/abcrown/` (default location in [Makefile](Makefile))
+- Clone [NeuralSAT](https://github.com/dynaroars/neuralsat) to `../exp/neuralsat/` (default location in [Makefile](Makefile))
 
 #### 5.2. Verify problems
 
